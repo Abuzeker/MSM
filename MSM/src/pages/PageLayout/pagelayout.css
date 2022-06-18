@@ -1,0 +1,58 @@
+
+
+.logo {
+    height: 40px;
+    margin: 10px;
+    text-align:center;
+    display:block;
+  }
+  
+  
+  .site-layout .site-layout-background {
+    background: #fff;
+    width: 100%;  
+  }
+  
+  
+  .header-logo{
+    width: 48;
+    height: 50px;
+    align-items: center;
+  }
+  
+  
+  
+    [data-theme="dark"] .site-layout  {
+      background: #141414;
+    }
+  
+    .trigger {
+      padding: 0 24px;
+      font-size: 18px;
+      line-height: 64px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+  
+    .logout{
+      padding: 10px 10px;
+      font-size: 18px;
+      line-height: 64px;
+      cursor: pointer;
+      float: right;
+    }
+    
+    .trigger:hover {
+      color: #1890ff;
+    }
+  
+    .logo img {
+      width: 48;
+      height: 90%;
+      align-items: left;
+    }
+  
+    .site-page-header-ghost-wrapper {
+      padding: 10px ;
+      background-color: #ffffff;
+    }

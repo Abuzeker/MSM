@@ -1,0 +1,14 @@
+.left-nav {
+    height: 100vh;
+  }
+    
+  .left-nav .left-nav-header {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      background-color: transparent;
+      border-width: thick;
+      border: 0px solid #5a5c58;
+      border-radius: 10px;
+  }
+  
