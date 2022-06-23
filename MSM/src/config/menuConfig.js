@@ -39,6 +39,7 @@ import {
             key: '/Line1ton',
             icon: <DashboardOutlined />
           },
+
           // {
           //   title: 'Report G2',
           //   key: '/G2Report',
@@ -97,6 +98,12 @@ import {
       //     },
       //   ]
       // },
+
+      {
+        title: 'Overall View',
+        key: '/AllLine',
+        icon: <DashboardOutlined />
+      },
 
       {
         title: 'LogExport',

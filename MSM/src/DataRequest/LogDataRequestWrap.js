@@ -871,69 +871,74 @@ export const LogDataMappingNameMSM = (Datamodel, RawData, type) => {
         return false
     }
 
-    RawData.forEach(element => {
-        if (element.DateTime === prevtime) { }
+    try {
 
-        else {
-            prevtime = element.DateTime
-            period = element.DateTime
+        RawData.forEach(element => {
+            if (element.DateTime === prevtime) { }
 
-            let data_buf3 = {}
-            let data_buf2 = RawData.filter(parasearch)
-            // console.log(data_buf2);
+            else {
+                prevtime = element.DateTime
+                period = element.DateTime
 
-            switch (type) {
-                case 'daily':
+                let data_buf3 = {}
+                let data_buf2 = RawData.filter(parasearch)
+                // console.log(data_buf2);
 
-                    name.forEach(element => {
-                        data_buf3[element.split('_')[0]] = 0
-                    });
+                switch (type) {
+                    case 'daily':
 
-                    data_buf2.map(obj => {
+                        name.forEach(element => {
+                            data_buf3[element.split('_')[0]] = 0
+                        });
 
-                        data_buf3['DateTime'] = obj.date
-                        data_buf3['Shift'] = 'Daily'
-        
-                        let namebuf = obj.Parameter.split('_')[0]
-                        // console.log(namebuf);
-        
-                        data_buf3[namebuf] = obj.Value
-                        return data_buf3
-                    })
+                        data_buf2.map(obj => {
 
-                    break;
+                            data_buf3['DateTime'] = obj.date
+                            data_buf3['Shift'] = 'Daily'
 
-                case 'shift':
+                            let namebuf = obj.Parameter.split('_')[0]
+                            // console.log(namebuf);
 
-                    name.forEach(element => {
-                        data_buf3[element] = 0
-                    });
+                            data_buf3[namebuf] = obj.Value
+                            return data_buf3
+                        })
 
-                    data_buf2.map(obj => {
+                        break;
 
-                        data_buf3['DateTime'] = obj.DateTime
-                        data_buf3['Shift'] = obj.Shift
-        
-                        let namebuf = obj.Parameter.split('_')[0]
-                        // console.log(namebuf);
-        
-                        data_buf3[namebuf] = obj.Value
-                        return data_buf3
-                    })
+                    case 'shift':
 
-                    break;
+                        name.forEach(element => {
+                            data_buf3[element] = 0
+                        });
 
-                default:
-                    break;
+                        data_buf2.map(obj => {
+
+                            data_buf3['DateTime'] = obj.DateTime
+                            data_buf3['Shift'] = obj.Shift
+
+                            let namebuf = obj.Parameter.split('_')[0]
+                            // console.log(namebuf);
+
+                            data_buf3[namebuf] = obj.Value
+                            return data_buf3
+                        })
+
+                        break;
+
+                    default:
+                        break;
+                }
+
+                // console.log(data_buf3);
+                ReturnValue.push(data_buf3)
             }
+        })
+
+    } catch (error) {
+        console.log('server error');
+    }
 
 
-
-
-            // console.log(data_buf3);
-            ReturnValue.push(data_buf3)
-        }
-    })
     return ReturnValue
 }
 

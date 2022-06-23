@@ -1,7 +1,7 @@
 
-import { Button, Col, Divider, Row, DatePicker, Card, Table, Select, Spin, Typography } from 'antd'
-import React, { useState, useEffect } from 'react'
-import { logdata_request, MSM_EventLog_request, MSM_logdata_request } from '../../api'
+import { Button, Col, Divider, Row, DatePicker, Card, Table, Select, Spin, Typography, Modal } from 'antd'
+import React, { useState, useEffect, Fragment } from 'react'
+import { logdata_request, MSM_EventLog_request, MSM_logdata_request, MSM_ReportRequest } from '../../api'
 import { C3Model, C3ModelMap, G2Model, MSMTable, DummyData, MSMDailyTable, MSMShiftTable } from '../../DataRequest/DataModel'
 import {
     ConvertMonentToDateTime, EventSortTimeMSM, GetDateTime,
@@ -11,6 +11,13 @@ import {
 import { Line, Column } from '@antv/g2plot';
 import moment from 'moment';
 import { CSVLink, CSVDownload } from "react-csv";
+import FormData from 'form-data'
+import LetterHead from '../../assets/MSMHeader.png'
+import LetterFoot from '../../assets/MSMFooter.png'
+import FileBase64 from 'react-file-base64'
+
+import { PDFViewer, PDFDownloadLink } from '@react-pdf/renderer'
+import Invoice from '../../utils/Invoice.jsx'
 
 
 let DTinitial = GetDateTime(0, 1)  // get from yesterday 00:00 to today 00:00
@@ -37,7 +44,9 @@ let EventLogSorted = []
 let DailyLogRequestRange = [DTinitial2[0], DTinitial2[1]]
 let DailyLogSorted = []
 let ShiftLogSorted = []
-
+let LogPDF = {
+    items: []
+}
 
 const headersDaily = [
     { label: "DateTime", key: "DateTime" },
@@ -67,11 +76,428 @@ const headersEvent = [
 
 ];
 
+const testdata = {
+    items: [
+        {
+            "Line50kg": 0,
+            "Line1kg": 28,
+            "Line2kg": 42,
+            "Line1Ton": 107,
+            "DateTime": "15/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 19,
+            "Line2kg": 48,
+            "Line1Ton": 120,
+            "DateTime": "15/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 23,
+            "Line2kg": 25,
+            "Line1Ton": 123,
+            "DateTime": "16/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 20,
+            "Line2kg": 51,
+            "Line1Ton": 120,
+            "DateTime": "16/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 2,
+            "Line2kg": 10,
+            "Line1Ton": 25,
+            "DateTime": "17/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "17/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "18/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "18/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "19/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "19/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "20/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "20/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "21/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "21/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "22/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "22/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "23/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 28,
+            "Line2kg": 42,
+            "Line1Ton": 107,
+            "DateTime": "15/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 19,
+            "Line2kg": 48,
+            "Line1Ton": 120,
+            "DateTime": "15/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 23,
+            "Line2kg": 25,
+            "Line1Ton": 123,
+            "DateTime": "16/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 20,
+            "Line2kg": 51,
+            "Line1Ton": 120,
+            "DateTime": "16/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 2,
+            "Line2kg": 10,
+            "Line1Ton": 25,
+            "DateTime": "17/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "17/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "18/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "18/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "19/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "19/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "20/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "20/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "21/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "21/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "22/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "22/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "23/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 28,
+            "Line2kg": 42,
+            "Line1Ton": 107,
+            "DateTime": "15/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 19,
+            "Line2kg": 48,
+            "Line1Ton": 120,
+            "DateTime": "15/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 23,
+            "Line2kg": 25,
+            "Line1Ton": 123,
+            "DateTime": "16/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 20,
+            "Line2kg": 51,
+            "Line1Ton": 120,
+            "DateTime": "16/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 2,
+            "Line2kg": 10,
+            "Line1Ton": 25,
+            "DateTime": "17/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "17/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "18/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "18/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "19/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "19/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "20/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "20/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "21/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "21/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "22/06/2022 07:00:00",
+            "Shift": "Morning"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "22/06/2022 19:00:00",
+            "Shift": "Night"
+        },
+        {
+            "Line50kg": 0,
+            "Line1kg": 0,
+            "Line2kg": 0,
+            "Line1Ton": 0,
+            "DateTime": "23/06/2022 07:00:00",
+            "Shift": "Morning"
+        }
+
+    ]
+
+}
+
+
 
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 const { Title } = Typography
+
 
 
 let line, stackedColumnPlot
@@ -82,6 +508,21 @@ const EnergyUsage = () => {
     const [Loading, setLoading] = useState(false);
     const [sortedInfo, setSortedInfo] = useState({});
     const [sortedInfo2, setSortedInfo2] = useState({});
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+
+    const handleOk = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalVisible(false);
+    };
+
+    const showModal = () => {
+        DailyLogRequest('shift', MSMShiftTable) 
+        setIsModalVisible(true);
+      };
 
 
     const LogColumbPerTime = [
@@ -200,6 +641,20 @@ const EnergyUsage = () => {
         setState(({ count }) => ({ count: count + 1 }));
     }
 
+    // const Form = () => {
+    //     // a local state to store the currently selected file.
+    //     // const [selectedFile, setSelectedFile] = React.useState(null);
+
+    //     // const handleSubmit = (event) => {
+    //     //   event.preventDefault()
+    //       const formData = new FormData();
+    //       formData.append("LetterHead", LetterHead);
+    //       formData.append("LetterFoot", LetterFoot);
+    //       formData.append("data", LetterFoot);
+
+    //     }
+
+
     useEffect(() => {
         console.log('Reffect');
 
@@ -220,7 +675,13 @@ const EnergyUsage = () => {
             annotations,
         });
 
-        BarChartInit()
+        try {
+            BarChartInit()
+        } catch (error) {
+
+        }
+
+
 
 
         try { stackedColumnPlot.render(); }
@@ -238,7 +699,12 @@ const EnergyUsage = () => {
         let response = await MSM_logdata_request(RequestDataOption_Daily, BarChartRange[0], BarChartRange[1])
         let BarChartData = DataSortTimeMSM(response)
 
-        stackedColumnPlot.changeData(BarChartData)
+        try {
+            stackedColumnPlot.changeData(BarChartData)
+        } catch (error) {
+
+        }
+
         console.log(BarChartData);
         // setLoading(false)
         setState(({ count }) => ({ count: count + 1 }));
@@ -399,6 +865,8 @@ const EnergyUsage = () => {
             case 'shift':
                 response = await MSM_logdata_request(RequestDataOption_shift, DailyLogRequestRange[0], DailyLogRequestRange[1])
                 ShiftLogSorted = LogDataMappingNameMSM(Model, DataSortTimeMSM(response), type)
+                LogPDF.items = ShiftLogSorted
+
                 console.log(ShiftLogSorted);
                 break;
 
@@ -412,6 +880,31 @@ const EnergyUsage = () => {
                 break;
         }
         setState(({ count }) => ({ count: count + 1 }));
+    }
+
+    const ExportPDF = async (type, Model) => {
+        //  let DailyLogSorted = LogDataMappingTimeMSM(MSMTable,response)   
+        console.log(DailyLogRequestRange);
+
+        let response = []
+
+        switch (type) {
+            case 'shift':
+                response = await MSM_ReportRequest(RequestDataOption_shift, DailyLogRequestRange[0], DailyLogRequestRange[1], LetterHead, LetterFoot)
+                // ShiftLogSorted = LogDataMappingNameMSM(Model, DataSortTimeMSM(response), type)
+                // console.log(ShiftLogSorted);
+                break;
+
+            case 'daily':
+                response = await MSM_ReportRequest(RequestDataOption_Daily, RequestDateRange[0], RequestDateRange[1], LetterHead, LetterFoot)
+                // DailyLogSorted = LogDataMappingNameMSM(Model, DataSortTimeMSM(response), type)
+                // console.log(DailyLogSorted);
+                break;
+
+            default:
+                break;
+        }
+        // setState(({ count }) => ({ count: count + 1 }));
     }
 
     const ChangeDateRange = (value, type) => {
@@ -464,9 +957,9 @@ const EnergyUsage = () => {
 
 
             {/* <Spin tip="Loading..." spinning={Loading} size="large"> */}
-                <Card title={'Weekly Record'} bordered={true} style={{ width: '100%', borderRadius: 15, backgroundColor: '#ffffff' }} hoverable={true}>
-                    <div id='container'></div>
-                </Card>
+            <Card title={'Weekly Record'} bordered={true} style={{ width: '100%', borderRadius: 15, backgroundColor: '#ffffff' }} hoverable={true}>
+                <div id='container'></div>
+            </Card>
             {/* </Spin> */}
 
 
@@ -483,7 +976,7 @@ const EnergyUsage = () => {
                     </CSVLink>
                 </Button>
 
-                <Button type='primary' style={{ marginLeft: '10px' }} onClick={(e) => { DailyLogRequest('daily', MSMDailyTable)}}>Update</Button>
+                <Button type='primary' style={{ marginLeft: '10px' }} onClick={(e) => { DailyLogRequest('daily', MSMDailyTable) }}>Update</Button>
             </div>
 
 
@@ -508,7 +1001,11 @@ const EnergyUsage = () => {
                     </CSVLink>
                 </Button>
 
-                <Button type='primary' style={{ marginLeft: '10px' }} onClick={(e) => { DailyLogRequest('shift', MSMShiftTable)}}>Update</Button>
+                <Button type='primary' style={{ marginLeft: '10px' }} onClick={(e) => { DailyLogRequest('shift', MSMShiftTable) }}>Update</Button>
+                
+                <Button type='primary' style={{ marginLeft: '10px' }} onClick={showModal} danger>
+                    Export PDF
+                </Button>
             </div>
 
             <Card title='Shift Log' bordered={true}
@@ -528,26 +1025,24 @@ const EnergyUsage = () => {
                 </div>
 
                 <div style={{ paddingBottom: '10px' }}>
-                        <RangePicker showTime onChange={(e) => ChangeDateRange(e, 'Event')} onOk={(e) => ChangeDateRange(e, 'Event')} />
+                    <RangePicker showTime onChange={(e) => ChangeDateRange(e, 'Event')} onOk={(e) => ChangeDateRange(e, 'Event')} />
 
-                        <Select defaultValue="Line50kg" style={{ width: 100, marginLeft: '10px' }} onChange={ChangeOption}>
-                            <Option value="All">All</Option>
-                            <Option value="Line50kg">Line50kg</Option>
-                            <Option value="Line1kg">Line1kg</Option>
-                            <Option value="Line2kg">Line2kg</Option>
-                            <Option value="Line1Ton">Line1Ton</Option>
-                        </Select>
+                    <Select defaultValue="Line50kg" style={{ width: 100, marginLeft: '10px' }} onChange={ChangeOption}>
+                        <Option value="All">All</Option>
+                        <Option value="Line50kg">Line50kg</Option>
+                        <Option value="Line1kg">Line1kg</Option>
+                        <Option value="Line2kg">Line2kg</Option>
+                        <Option value="Line1Ton">Line1Ton</Option>
+                    </Select>
 
-                        <Button type='primary' style={{ marginLeft: '10px' }} >
-                            <CSVLink data={EventLogSorted} target="_blank" filename={"EventLog.csv"} headers={headersEvent}>
-                                Export
-                            </CSVLink>
-                        </Button>
+                    <Button type='primary' style={{ marginLeft: '10px' }} >
+                        <CSVLink data={EventLogSorted} target="_blank" filename={"EventLog.csv"} headers={headersEvent}>
+                            Export
+                        </CSVLink>
+                    </Button>
 
-
-
-                        <Button type='primary' style={{ marginLeft: '10px' }} onClick={() => { EvenLogRequest() }}>Update</Button>
-                    </div>
+                    <Button type='primary' style={{ marginLeft: '10px' }} onClick={() => { EvenLogRequest() }}>Update</Button>
+                </div>
 
                 <Card title='Event Log' bordered={true}
                     style={{ width: '100%', borderRadius: 15, marginBottom: '10px' }} hoverable={true}>
@@ -555,6 +1050,25 @@ const EnergyUsage = () => {
                 </Card>
 
             </div>
+
+            <Modal footer={null}
+            closable={false}
+            width={1050} visible={isModalVisible}  onCancel={handleCancel}            
+            >
+                <Fragment>
+                    <PDFViewer width="1000" height="800">
+                        <Invoice invoice={LogPDF} />
+                    </PDFViewer>
+                </Fragment>
+            </Modal>
+
+            {/* <Fragment>
+                <PDFViewer width="1000" height="600">
+                    <Invoice invoice={LogPDF} />
+                </PDFViewer>
+            </Fragment> */}
+
+
 
 
 

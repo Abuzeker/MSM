@@ -150,9 +150,54 @@ export const MSM_RealTime_request = (parameter) => ajax('http://192.168.68.105:3
     },
     'POST')
 
-    export const MSM_Login = (Username, Password) => ajax('http://192.168.68.105:3000/api/login/',
+export const MSM_Login = (Username, Password) => ajax('http://192.168.68.105:3000/api/login/',
     {
-            "username": Username,
-            "password": Password
+        "username": Username,
+        "password": Password
     },
     'POST')
+
+export const MSM_ReportRequest = (parameter, datetimeStart, datetimeEnd, LetterHead, LetterFoot) => ajax('http://192.168.68.105:3000/api/generate_report/',
+    {
+        "projectID": "MSM",
+        "parameters": parameter,
+        "letterhead": LetterHead,
+        "letterfoor": LetterFoot,
+        "fields": ["date_created", "parameter", "value", "unit"],
+        "column_names": ["Datetime", "Parameter", "Value", "Unit"],
+        "timezone": "Asia/Kuala_Lumpur",
+        "datetime": [datetimeStart, datetimeEnd],
+        "file_properties": {
+            "filename": "report",
+            "format": "pdf",
+            "page_layout": {
+                "page_size": ["8.27", "11.69"],
+                "orientation": "portrait",
+                "top_margin": "1.00",
+                "bottom_margin": "1.00",
+                "left_margin": "1.00",
+                "right_margin": "1.00"
+            }
+        }
+    },
+    'POST')        
+    
+    
+    // "projectID": "MSM",
+        // "parameters": parameter,
+        // "fields": ["date_created", "parameter", "value", "unit"],
+        // "column_names": ["Datetime", "Parameter", "Value", "Unit"],
+        // "timezone": "Asia/Kuala_Lumpur",
+        // "datetime": [datetimeStart, datetimeEnd],
+        // "file_properties": {
+        //     "filename": "report",
+        //     "format": "pdf",
+        //     "page_layout": {
+        //         "page_size": ["8.27", "11.69"],
+        //         "orientation": "portrait",
+        //         "top_margin": "1.00",
+        //         "bottom_margin": "1.00",
+        //         "left_margin": "1.00",
+        //         "right_margin": "1.00"
+        //     }
+        // }

@@ -78,10 +78,18 @@ const Home = () => {
             RenderNewData()
         }, 1000)
 
-        DailyLogRequest('shift', MSMShiftTable)
-        DailyLogRequest('daily', MSMDailyTable)
+        try {
 
-        EvenLogRequest()
+            DailyLogRequest('shift', MSMShiftTable)
+            DailyLogRequest('daily', MSMDailyTable)
+            
+        } catch (error) {
+            console.log('server error');
+        }
+
+
+
+        //EvenLogRequest()
 
 
         return () => {

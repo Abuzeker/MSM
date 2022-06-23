@@ -27,6 +27,7 @@ import Line1kg from '../Line/Line1kg';
 import Line2kg from '../Line/Line2kg';
 import Line50kg from '../Line/Line50kg';
 import Line1ton from '../Line/Line1ton';
+import AllLine from '../Line/AllLine';
 
 
 
@@ -184,6 +185,7 @@ const PageLayout = () => {
               <Route path='/Line2kg' component={Line2kg} />
               <Route path='/Line50kg' component={Line50kg} />
               <Route path='/Line1ton' component={Line1ton} />
+              <Route path='/AllLine' component={AllLine}/>
               <Route path='/G2Report' component={Line1ReportG2} />
               <Route path='/DataVisualize' component={Line1DataLog} />
               <Route path='/NotificationLine1' component={NotificationLine1} />
