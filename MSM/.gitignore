@@ -5,6 +5,13 @@
 /.pnp
 .pnp.js
 
+*.zip
+.idea/
+.vscode/
+node_modules/.cache/
+dist/ 
+!node_modules/ngx-mydatepicker/dist/ 
+
 # testing
 /coverage
 
